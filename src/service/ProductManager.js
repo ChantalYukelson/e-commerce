@@ -21,8 +21,15 @@ export default class ProductManager {
     }
 
     saveToFile() {
-        fs.writeFile(productosFilePath, JSON.stringify(this.products, null, 2));
+        fs.writeFile(productosFilePath, JSON.stringify(this.products, null, 2), (err) => {
+            if (err) {
+                console.error('Error al guardar el archivo:', err);
+            } else {
+                console.log('Archivo guardado exitosamente.');
+            }
+        });
     }
+    
 
     getAllProducts(limit) {
         if(limit){

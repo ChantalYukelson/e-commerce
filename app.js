@@ -10,7 +10,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use('/api/products', productsRouter);
 app.use('/api/carts', cartRouter);  // Usa el router de carts
 
-const SERVER_PORT = 9090;
+const SERVER_PORT = 8080;
 app.listen(SERVER_PORT, () => {
     console.log("Servidor escuchado por el puerto: " + SERVER_PORT);
 });
