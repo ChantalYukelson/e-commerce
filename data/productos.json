@@ -1,0 +1,33 @@
+[
+  {
+    "id": 1,
+    "title": "Camisa blanca",
+    "description": "Camisa de vestir elegante blanca para hombre",
+    "code": "A1",
+    "price": 30000,
+    "stock": 20,
+    "category": "Camisas",
+    "thumbnails": [
+      "https://http2.mlstatic.com/D_NQ_NP_651293-MLA73102451769_112023-O.webp"
+    ],
+    "status": true
+  },
+
+
+  {
+    "id": 2,
+    "title": "Pantalon negro",
+    "description": "Pantalon negro de vestir elegante para hombre",
+    "code": "A2",
+    "price": 25000,
+    "stock": 20,
+    "category": "Pantalones",
+    "thumbnails": [
+      "https://i.pinimg.com/736x/4b/f9/17/4bf917c713c22e8cdc1eb52759d09fb0.jpg"
+    ],
+    "status": true
+  }
+
+
+
+]
