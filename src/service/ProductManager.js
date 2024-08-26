@@ -1,4 +1,4 @@
-import fs from 'fs'
+import fs from 'fs/promises'
 import path from 'path'
 
 const productosFilePath = path.resolve('data', 'productos.json')
