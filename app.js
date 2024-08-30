@@ -6,6 +6,11 @@ import cartRouter from './src/routes/cart.router.js';
 import ProductManager from './src/service/ProductManager.js'; // Asegúrate de importar ProductManager
 import path from 'path';
 import http from 'http';
+import { fileURLToPath } from 'url';
+
+// Obtener el directorio actual
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app = express();
 const httpServer = http.createServer(app); // Crear un servidor HTTP
@@ -51,3 +56,4 @@ const SERVER_PORT = 8080;
 httpServer.listen(SERVER_PORT, () => {
     console.log("Servidor escuchando por el puerto: " + SERVER_PORT);
 });
+
