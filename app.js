@@ -21,6 +21,8 @@ const productManager = new ProductManager(); // Instancia de ProductManager
 // Configurar Handlebars
 const hbs = create({
     extname: '.handlebars', // Extensión de archivo
+    defaultLayout: 'main',  // Establecer el layout principal
+    layoutsDir: path.join(__dirname, '/src/views/layouts'), // Carpeta layouts
 });
 app.engine('handlebars', hbs.engine);
 app.set('view engine', 'handlebars');
@@ -56,4 +58,3 @@ const SERVER_PORT = 8080;
 httpServer.listen(SERVER_PORT, () => {
     console.log("Servidor escuchando por el puerto: " + SERVER_PORT);
 });
-

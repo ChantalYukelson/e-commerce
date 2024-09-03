@@ -3,17 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Productos en Tiempo Real</title>
+    <title>Productos</title>
+    
+    <!-- Incluir el cliente de Socket.IO -->
     <script src="/socket.io/socket.io.js"></script>
+
     <script>
-        const socket = io();
+        const socket = io(); // Conectar con el servidor
 
         // Escuchar actualizaciones de la lista de productos
         socket.on('productListUpdate', (newProduct) => {
             const productList = document.getElementById('product-list');
             const productItem = document.createElement('li');
+            productItem.dataset.id = newProduct.id; // Asignar id del producto al elemento li
             productItem.textContent = `${newProduct.title} - $${newProduct.price}`;
-            productList.appendChild(productItem);
+            productList.appendChild(productItem); // Agregar el nuevo producto a la lista
         });
 
         // Escuchar cuando un producto es eliminado
@@ -22,7 +26,7 @@
             const productItems = productList.getElementsByTagName('li');
             for (let item of productItems) {
                 if (item.dataset.id == productId) {
-                    item.remove();
+                    item.remove(); // Eliminar el producto si coincide el ID
                     break;
                 }
             }
@@ -33,12 +37,18 @@
             event.preventDefault();
             const title = document.getElementById('title').value;
             const price = document.getElementById('price').value;
+
+            // Emitir el nuevo producto al servidor
             socket.emit('newProduct', { title, price });
+
+            // Limpiar el formulario
+            document.getElementById('title').value = '';
+            document.getElementById('price').value = '';
         }
     </script>
 </head>
 <body>
-    <h1>Productos en Tiempo Real</h1>
+    <h1>Productos</h1>
     <ul id="product-list">
         {{#each products}}
             <li data-id="{{this.id}}">{{this.title}} - ${{this.price}}</li>
