@@ -1,5 +1,5 @@
 import { Router } from "express";
-import ProductManager from "../service/ProductManager.js";
+import ProductManager from "../service/ProductManager.js"; // Luego cambiar por el modelo de MongoDB
 
 const router = Router();
 const productManager = new ProductManager();
@@ -8,9 +8,39 @@ const productManager = new ProductManager();
 export default (io) => {
     router.get('/', async (req, res) => {
         try {
-            const limit = req.query.limit ? parseInt(req.query.limit) : undefined;
-            const products = await productManager.getAllProducts(limit);
-            res.json(products);
+            const { limit = 10, page = 1, sort, query } = req.query;
+            
+            // Filtro basado en query
+            const filter = query ? { category: query } : {}; // Buscar por categoría o disponibilidad
+
+            // Orden ascendente o descendente
+            const sortOption = sort === 'asc' ? { price: 1 } : { price: -1 };
+
+            // Obtener productos con filtro, paginación y ordenamiento
+            const products = await productManager.getAllProducts({
+                filter,
+                limit: parseInt(limit),
+                page: parseInt(page),
+                sort: sortOption
+            });
+
+            // Contar productos y calcular total de páginas
+            const totalProducts = await productManager.countProducts(filter);
+            const totalPages = Math.ceil(totalProducts / limit);
+
+            // Estructura de respuesta solicitada
+            res.json({
+                status: 'success',
+                payload: products,
+                totalPages,
+                prevPage: page > 1 ? page - 1 : null,
+                nextPage: page < totalPages ? parseInt(page) + 1 : null,
+                page: parseInt(page),
+                hasPrevPage: page > 1,
+                hasNextPage: page < totalPages,
+                prevLink: page > 1 ? `/api/products?limit=${limit}&page=${page - 1}&sort=${sort}&query=${query}` : null,
+                nextLink: page < totalPages ? `/api/products?limit=${limit}&page=${parseInt(page) + 1}&sort=${sort}&query=${query}` : null
+            });
         } catch (error) {
             console.log(error);
             res.status(500).json({ error: 'Error al obtener los productos' });

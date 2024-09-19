@@ -3,7 +3,7 @@ import { create } from 'express-handlebars'; // Importar Handlebars
 import { Server as SocketIOServer } from 'socket.io'; // Importar socket.io
 import productsRouter from './src/routes/products.router.js';
 import cartRouter from './src/routes/cart.router.js';
-import ProductManager from './src/service/ProductManager.js'; // Asegúrate de importar ProductManager
+import mongoose from 'mongoose'; // Importar mongoose
 import path from 'path';
 import http from 'http';
 import { fileURLToPath } from 'url';
@@ -16,7 +16,16 @@ const app = express();
 const httpServer = http.createServer(app); // Crear un servidor HTTP
 const io = new SocketIOServer(httpServer); // Configurar WebSocket con Socket.IO
 
-const productManager = new ProductManager(); // Instancia de ProductManager
+// Conectar a MongoDB
+
+mongoose.connect('mongodb://localhost:27017/tu_base_de_datos')
+    .then(() => {
+        console.log('Conectado a MongoDB');
+    })
+    .catch(err => {
+        console.error('Error al conectar a MongoDB:', err);
+    });
+
 
 // Configurar Handlebars
 const hbs = create({

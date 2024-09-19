@@ -1,81 +1,40 @@
-import fs from 'fs/promises'
-import path from 'path'
-
-const productosFilePath = path.resolve('data', 'productos.json')
+import Product from '../models/Product.js'; // Importa el modelo de MongoDB
 
 export default class ProductManager {
-    constructor() {
-        this.products = []
-        this.init()
-    }
-
-    async init() {
-        try{
-            const data = await fs.readFile(productosFilePath, 'utf-8')
-            this.products = JSON.parse(data)
-        } catch (error) {
-            this.products = []
-
-        }
-
-    }
-
-    saveToFile() {
-        fs.writeFile(productosFilePath, JSON.stringify(this.products, null, 2), (err) => {
-            if (err) {
-                console.error('Error al guardar el archivo:', err);
-            } else {
-                console.log('Archivo guardado exitosamente.');
-            }
-        });
-    }
     
-
-    getAllProducts(limit) {
-        if(limit){
-            return this.products.slice(0, limit)
-        }
-        return this.products
-    }
-
-    getProductById(id) {
-        return this.products.find(product => product.id == id)
-    }
-
-    addProduct(product) {
-        const newProduct = {
-            id: this.products.length ? this.products[this.products.length - 1].id - 1 : 1,
-            ...product,
-            status: true
+    // Obtener todos los productos con filtros, paginación y ordenamiento
+    async getAllProducts({ filter = {}, limit = 10, page = 1, sort = {} }) {
+        const options = {
+            limit: parseInt(limit),
+            page: parseInt(page),
+            sort
         };
-        this.products.push(newProduct)
-        this.saveToFile()
-        return newProduct;
+        return await Product.paginate(filter, options); // Utiliza paginación de MongoDB
     }
 
-    updateProduct(id, updatedFields) {
-        const productIndex = this.products.findIndex(product => product.id == id)
-        if (productIndex === -1) return null;
-
-        const updatedProduct = {
-            ...this.products[productIndex],
-            ...updatedFields,
-            id: this.products[productIndex].id 
-        };
-        this.products[productIndex] = this.updatedProduct;
-        this.saveToFile();
-        return this.updatedProduct;
+    // Obtener producto por ID
+    async getProductById(id) {
+        return await Product.findById(id);
     }
 
-    deleteProduct(id) {
-        const productIndex = this.products.findIndex(product => product.id == id)
-        if (productIndex === -1) return null;
-
-        const deleteProduct = this.products.splice(productIndex, 1)
-        this.saveToFile()
-        return deleteProduct[0];
-
+    // Agregar un nuevo producto
+    async addProduct(productData) {
+        const newProduct = new Product(productData);
+        return await newProduct.save(); // Guardar el nuevo producto en la base de datos
     }
 
+    // Actualizar un producto por ID
+    async updateProduct(id, updatedFields) {
+        return await Product.findByIdAndUpdate(id, updatedFields, { new: true }); // Actualizar y devolver el producto actualizado
+    }
 
+    // Eliminar un producto por ID
+    async deleteProduct(id) {
+        return await Product.findByIdAndDelete(id); // Eliminar producto de la base de datos
+    }
+
+    // Contar el número total de productos (para la paginación)
+    async countProducts(filter = {}) {
+        return await Product.countDocuments(filter);
+    }
 }
