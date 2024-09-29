@@ -1,16 +1,100 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lista de Productos</title>
+    <title>Estuardo - Moda para Hombres</title>
+    <link rel="stylesheet" href="/styles.css">
 </head>
 <body>
-    <h1>Productos</h1>
-    <ul>
-        {{#each products}}
-            <li>{{this.name}} - ${{this.price}}</li>
-        {{/each}}
-    </ul>
+    <!-- Barra de navegación -->
+    <header>
+        <nav class="navbar">
+            <ul>
+                <li><a href="/">Inicio</a></li>
+                <li><a href="#">Nosotros</a></li>
+                <li><a href="#">Contacto</a></li>
+                <!-- Enlace al carrito -->
+                <li><a href="/cartDetails">Carrito</a></li>
+            </ul>
+        </nav>
+    </header>
+    
+    <!-- Sección principal -->
+    <main>
+        <section id="hero">
+            <h2>Moda masculina de calidad</h2>
+            <p>Descubre nuestras colecciones de ropa moderna y elegante.</p>
+            <a href="/realtimeproducts" class="btn-primary">Ver Productos</a>
+        </section>
+
+        <!-- Catálogo de productos -->
+        <section id="destacados">
+            <h2>Productos Destacados</h2>
+            <div class="product-grid">
+                {{#each products}}
+                    <div class="product-card">
+                        <img src="{{this.thumbnails.[0]}}" alt="{{this.title}}">
+                        <h3>{{this.title}}</h3>
+                        <p>Precio: ${{this.price}}</p>
+
+                        <!-- Botón Ver Detalles -->
+                        <a href="/products/{{this._id}}" class="btn-secondary">Ver Detalles</a>
+
+                        <!-- Se eliminaron los controles de carrito aquí -->
+                    </div>
+                {{else}}
+                    <p>No hay productos disponibles en este momento.</p>
+                {{/each}}
+            </div>
+        </section>
+    </main>
+
+    <!-- Pie de página -->
+    <footer>
+        <p>© 2024 Estuardo. Todos los derechos reservados.</p>
+    </footer>
+
+    <!-- Scripts de carrito -->
+    <script>
+        // Funciones para manejar la cantidad de productos
+        function incrementQuantity(productId) {
+            const quantityElement = document.getElementById(`quantity-${productId}`);
+            quantityElement.textContent = parseInt(quantityElement.textContent) + 1;
+        }
+
+        function decrementQuantity(productId) {
+            const quantityElement = document.getElementById(`quantity-${productId}`);
+            const currentQuantity = parseInt(quantityElement.textContent);
+            if (currentQuantity > 0) {
+                quantityElement.textContent = currentQuantity - 1;
+            }
+        }
+
+        async function addToCart(productId, productName) {
+            const quantityElement = document.getElementById(`quantity-${productId}`);
+            const quantity = parseInt(quantityElement.textContent);
+            if (quantity > 0) {
+                try {
+                    // Hacer la petición POST para agregar productos al carrito
+                    const response = await fetch('/api/carts/add-product', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ productId, quantity })
+                    });
+
+                    if (response.ok) {
+                        alert(`${productName} agregado al carrito`); // Cambiar el mensaje para mostrar el nombre del producto
+                    } else {
+                        alert('Error al agregar producto al carrito');
+                    }
+                } catch (error) {
+                    console.error('Error al agregar producto:', error);
+                }
+            } else {
+                alert('Debes seleccionar al menos un producto.');
+            }
+        }
+    </script>
 </body>
 </html>

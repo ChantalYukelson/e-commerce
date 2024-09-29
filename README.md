@@ -1,6 +1,6 @@
 # e-commerce
 programacion backend 1
-supleboost/
+e-commerce/
 │
 ├── src/
 │   ├── routes/

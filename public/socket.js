@@ -1,14 +1,13 @@
 const socket = io();
 
-// Escuchar el evento para actualizar la lista de productos
 socket.on('productListUpdate', (newProduct) => {
-    const productList = document.getElementById('productList');
-    const newItem = document.createElement('li');
-    newItem.textContent = `${newProduct.name} - ${newProduct.price}`;
-    productList.appendChild(newItem);
+    // Actualiza la lista de productos en la interfaz
+    console.log('Nuevo producto agregado:', newProduct);
+    // Aquí puedes implementar la lógica para actualizar la UI
 });
 
-// Función para emitir un nuevo producto desde el front-end
-function createNewProduct(product) {
-    socket.emit('newProduct', product); // Emitir el nuevo producto al backend
-}
+socket.on('productDeleted', (productId) => {
+    // Actualiza la lista de productos al eliminar uno
+    console.log('Producto eliminado:', productId);
+    // Aquí puedes implementar la lógica para actualizar la UI
+});

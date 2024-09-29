@@ -1,65 +1,104 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Productos</title>
-    
-    <!-- Incluir el cliente de Socket.IO -->
-    <script src="/socket.io/socket.io.js"></script>
-
-    <script>
-        const socket = io(); // Conectar con el servidor
-
-        // Escuchar actualizaciones de la lista de productos
-        socket.on('productListUpdate', (newProduct) => {
-            const productList = document.getElementById('product-list');
-            const productItem = document.createElement('li');
-            productItem.dataset.id = newProduct.id; // Asignar id del producto al elemento li
-            productItem.textContent = `${newProduct.title} - $${newProduct.price}`;
-            productList.appendChild(productItem); // Agregar el nuevo producto a la lista
-        });
-
-        // Escuchar cuando un producto es eliminado
-        socket.on('productDeleted', (productId) => {
-            const productList = document.getElementById('product-list');
-            const productItems = productList.getElementsByTagName('li');
-            for (let item of productItems) {
-                if (item.dataset.id == productId) {
-                    item.remove(); // Eliminar el producto si coincide el ID
-                    break;
-                }
-            }
-        });
-
-        // Enviar nuevo producto desde el formulario
-        function addProduct(event) {
-            event.preventDefault();
-            const title = document.getElementById('title').value;
-            const price = document.getElementById('price').value;
-
-            // Emitir el nuevo producto al servidor
-            socket.emit('newProduct', { title, price });
-
-            // Limpiar el formulario
-            document.getElementById('title').value = '';
-            document.getElementById('price').value = '';
-        }
-    </script>
+    <title>Productos en Tiempo Real - Estuardo</title>
+    <link rel="stylesheet" href="/styles.css">
 </head>
 <body>
-    <h1>Productos</h1>
-    <ul id="product-list">
-        {{#each products}}
-            <li data-id="{{this.id}}">{{this.title}} - ${{this.price}}</li>
-        {{/each}}
-    </ul>
+    <!-- Barra de navegación -->
+    <header>
+        <nav class="navbar">
+            <ul>
+                <li><a href="/">Inicio</a></li>
+                <li><a href="#">Nosotros</a></li>
+                <li><a href="#">Contacto</a></li>
+                <li><a href="/cartDetails">Carrito</a></li> <!-- Enlace actualizado -->
+            </ul>
+        </nav>
+    </header>
+    
+    <main>
+        <h2>Productos Disponibles</h2>
+        <div id="product-list" class="product-grid">
+            {{#each products}}
+                <div class="product-card">
+                    <img src="{{this.thumbnails.[0]}}" alt="{{this.title}}">
+                    <h3>{{this.title}}</h3>
+                    <p>Precio: ${{this.price}}</p>
 
-    <h2>Agregar nuevo producto</h2>
-    <form onsubmit="addProduct(event)">
-        <input type="text" id="title" placeholder="Nombre del producto" required />
-        <input type="number" id="price" placeholder="Precio" required />
-        <button type="submit">Agregar</button>
-    </form>
+                    <!-- Enlace corregido para ver detalles -->
+                    <div class="details-button">
+                        <a href="/products/{{this._id}}" class="btn-secondary">Ver Detalles</a>
+                    </div>
+                    
+                    <!-- Botón Agregar al Carrito -->
+                    <div class="add-to-cart-container">
+                        <button class="btn-secondary" onclick="addToCart('{{this._id}}', '{{this.title}}')">Agregar al Carrito</button>
+                    </div>
+                </div>
+            {{else}}
+                <p>No hay productos disponibles en este momento.</p>
+            {{/each}}
+        </div>
+    </main>
+    
+    <footer>
+        <p>© 2024 Estuardo. Todos los derechos reservados.</p>
+    </footer>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        const socket = io();
+        const productList = document.getElementById('product-list');
+
+        // Función para renderizar todos los productos
+        const renderProducts = (products) => {
+            productList.innerHTML = ''; // Limpiar la lista actual
+
+            products.forEach(product => {
+                const productElement = document.createElement('div');
+                productElement.classList.add('product-card');
+                productElement.innerHTML = `
+                    <img src="${product.thumbnails[0]}" alt="${product.title}">
+                    <h3>${product.title}</h3>
+                    <p>Precio: $${product.price}</p>
+                    <div class="details-button">
+                        <!-- Enlace corregido para la vista de detalles del producto -->
+                        <a href="/products/${product._id}" class="btn-secondary">Ver Detalles</a>
+                    </div>
+                    <div class="add-to-cart-container">
+                        <button class="btn-secondary" onclick="addToCart('${product._id}', '${product.title}')">Agregar al Carrito</button>
+                    </div>
+                `;
+                productList.appendChild(productElement);
+            });
+        };
+
+        function addToCart(productId, productName) {
+            alert(`Agregado ${productName} al carrito`);
+            // Aquí puedes hacer la lógica para enviar el producto al carrito
+        }
+
+        socket.on('initialProducts', (products) => {
+            renderProducts(products);
+        });
+
+        socket.on('newProduct', (product) => {
+            renderProducts([product]);
+        });
+
+        socket.on('updateProduct', (updatedProduct) => {
+            renderProducts([updatedProduct]);
+        });
+
+        socket.on('deleteProduct', (deletedProduct) => {
+            const productElement = document.querySelector(`.product-card[data-id="${deletedProduct._id}"]`);
+            if (productElement) {
+                productElement.remove();
+            }
+        });
+    </script>
 </body>
 </html>

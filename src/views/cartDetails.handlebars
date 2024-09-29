@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Carrito de Compras</title>
+    <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+    <header>
+        <nav class="navbar">
+            <ul>
+                <li><a href="/">Inicio</a></li>
+                <li><a href="#">Nosotros</a></li>
+                <li><a href="#">Contacto</a></li>
+                <li><a href="/cartDetails">Carrito</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <h2>Carrito de Compras</h2>
+        
+        <ul>
+            {{#if cart.products.length}}
+                {{#each cart.products}}
+                    <li>
+                        <span>{{this.product.title}} - Precio: ${{this.product.price}} - Cantidad: {{this.quantity}}</span>
+                        <button onclick="removeProduct('{{../cart._id}}', '{{this.product._id}}')">Eliminar</button>
+                    </li>
+                {{/each}}
+                <p><strong>Total del carrito:</strong> ${{cart.totalPrice}}</p>
+            {{else}}
+                <p>No hay productos en el carrito.</p>
+            {{/if}}
+        </ul>
+        
+        <button onclick="clearCart('{{cart._id}}')">Vaciar Carrito</button>
+        <button onclick="purchase()">Realizar Compra</button>
+    </main>
+
+    <script>
+        async function removeProduct(cartId, productId) {
+            try {
+                const response = await fetch(`/api/carts/${cartId}/product/${productId}`, {
+                    method: 'DELETE',
+                });
+
+                if (response.ok) {
+                    location.reload(); // Recargar la página para actualizar el carrito
+                } else {
+                    alert('Error al eliminar producto');
+                }
+            } catch (error) {
+                console.error('Error al eliminar producto:', error);
+            }
+        }
+
+        async function clearCart(cartId) {
+            try {
+                const response = await fetch(`/api/carts/${cartId}`, {
+                    method: 'DELETE'
+                });
+
+                if (response.ok) {
+                    location.reload(); // Recargar la página para actualizar el carrito
+                } else {
+                    alert('Error al vaciar el carrito');
+                }
+            } catch (error) {
+                console.error('Error al vaciar el carrito:', error);
+            }
+        }
+
+        async function purchase() {
+            const cartId = '{{cart._id}}'; // Usar el ID del carrito actual
+            try {
+                const response = await fetch(`/api/carts/${cartId}`, {
+                    method: 'DELETE'
+                });
+
+                if (response.ok) {
+                    alert('Compra realizada con éxito');
+                    location.reload(); // Recargar la página después de la compra
+                } else {
+                    alert('Error al realizar la compra');
+                }
+            } catch (error) {
+                console.error('Error al realizar la compra:', error);
+            }
+        }
+    </script>
+</body>
+</html>

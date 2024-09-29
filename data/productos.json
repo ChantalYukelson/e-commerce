@@ -11,5 +11,19 @@
       "https://http2.mlstatic.com/D_NQ_NP_651293-MLA73102451769_112023-O.webp"
     ],
     "status": true
+  },
+  {
+    "title": "Camisa de Cuadros",
+    "description": "Camisa de cuadros de algodón, cómoda y elegante, ideal para ocasiones informales.",
+    "code": "C0",
+    "price": 39.99,
+    "stock": 100,
+    "category": "Ropa de Hombre",
+    "thumbnails": [
+      "https://example.com/camisa-cuadros1.jpg",
+      "https://example.com/camisa-cuadros2.jpg"
+    ],
+    "_id": "66f449ed1a7329e53d86d264",
+    "__v": 0
   }
 ]

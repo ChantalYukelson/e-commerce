@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detalles del Producto</title>
+    <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+    <header>
+        <nav class="navbar">
+            <ul>
+                <li><a href="/">Inicio</a></li>
+                <li><a href="/realtimeproducts">Productos</a></li>
+                <li><a href="#">Nosotros</a></li>
+                <li><a href="#">Contacto</a></li>
+                <li><a href="/cartDetails">Carrito</a></li>
+            </ul>
+        </nav>
+    </header>
+    
+    <main>
+        <section id="product-details">
+            <h1>{{product.title}}</h1>
+            <div class="product-details-container">
+                <img src="{{product.thumbnails.[0]}}" alt="{{product.title}}">
+                <div class="product-info">
+                    <p><strong>Descripción:</strong> {{product.description}}</p>
+                    <p><strong>Precio:</strong> ${{product.price}}</p>
+                    <p><strong>Código:</strong> {{product.code}}</p>
+                    <p><strong>Stock disponible:</strong> {{product.stock}}</p>
+                    <p><strong>Categoría:</strong> {{product.category}}</p>
+
+                    <!-- Botón para agregar al carrito desde la vista de detalles -->
+                    <button class="btn-primary" onclick="addToCart('{{product._id}}', '{{product.title}}')">Agregar al Carrito</button>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>© 2024 Estuardo. Todos los derechos reservados.</p>
+    </footer>
+
+    <!-- Scripts para agregar al carrito -->
+    <script>
+        function addToCart(productId, productName) {
+            alert(`Agregado ${productName} al carrito`);
+            // Aquí puedes hacer la lógica para enviar el producto al carrito
+        }
+    </script>
+</body>
+</html>

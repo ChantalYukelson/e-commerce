@@ -1,40 +1,89 @@
-import Product from '../models/Product.js'; // Importa el modelo de MongoDB
+import mongoose from 'mongoose';
+import Product from '../models/Product.js';
 
-export default class ProductManager {
-    
-    // Obtener todos los productos con filtros, paginación y ordenamiento
+class ProductManager {
+    // Obtener todos los productos con paginación, filtros y ordenamiento
     async getAllProducts({ filter = {}, limit = 10, page = 1, sort = {} }) {
-        const options = {
-            limit: parseInt(limit),
-            page: parseInt(page),
-            sort
-        };
-        return await Product.paginate(filter, options); // Utiliza paginación de MongoDB
+        try {
+            // Contar el total de productos para la paginación
+            const totalProducts = await Product.countDocuments(filter);
+
+            // Obtener productos con paginación, filtros y ordenamiento
+            const products = await Product.find(filter)
+                .limit(limit)
+                .skip((page - 1) * limit)
+                .sort(sort);
+
+            // Devolver los productos y la información de la paginación
+            return {
+                products,
+                totalPages: Math.ceil(totalProducts / limit),
+                currentPage: page,
+                totalProducts,
+            };
+        } catch (err) {
+            console.error('Error al obtener los productos:', err);
+            return { products: [], totalPages: 0, currentPage: page, totalProducts: 0 };
+        }
     }
 
-    // Obtener producto por ID
+    // Obtener un producto por ID
     async getProductById(id) {
-        return await Product.findById(id);
+        try {
+            if (!mongoose.Types.ObjectId.isValid(id)) {
+                console.error('ID inválido');
+                return null;
+            }
+            const product = await Product.findById(id);
+            return product || null;
+        } catch (err) {
+            console.error('Error al obtener el producto por ID:', err);
+            return null;
+        }
     }
 
     // Agregar un nuevo producto
     async addProduct(productData) {
-        const newProduct = new Product(productData);
-        return await newProduct.save(); // Guardar el nuevo producto en la base de datos
+        try {
+            const newProduct = new Product(productData);
+            await newProduct.save();
+            console.log('Producto agregado:', newProduct);
+            return newProduct;
+        } catch (err) {
+            console.error('Error al agregar el producto:', err);
+            return null;
+        }
     }
 
     // Actualizar un producto por ID
     async updateProduct(id, updatedFields) {
-        return await Product.findByIdAndUpdate(id, updatedFields, { new: true }); // Actualizar y devolver el producto actualizado
+        try {
+            if (!mongoose.Types.ObjectId.isValid(id)) {
+                console.error('ID inválido');
+                return null;
+            }
+            const updatedProduct = await Product.findByIdAndUpdate(id, updatedFields, { new: true });
+            return updatedProduct || null;
+        } catch (err) {
+            console.error('Error al actualizar el producto:', err);
+            return null;
+        }
     }
 
     // Eliminar un producto por ID
     async deleteProduct(id) {
-        return await Product.findByIdAndDelete(id); // Eliminar producto de la base de datos
-    }
-
-    // Contar el número total de productos (para la paginación)
-    async countProducts(filter = {}) {
-        return await Product.countDocuments(filter);
+        try {
+            if (!mongoose.Types.ObjectId.isValid(id)) {
+                console.error('ID inválido');
+                return null;
+            }
+            const deletedProduct = await Product.findByIdAndDelete(id);
+            return deletedProduct || null;
+        } catch (err) {
+            console.error('Error al eliminar el producto:', err);
+            return null;
+        }
     }
 }
+
+export default ProductManager;
