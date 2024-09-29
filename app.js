@@ -10,6 +10,7 @@ import CartManager from './src/service/CartManager.js';
 import session from 'express-session'; 
 import connectDB from './src/config/db.js';
 
+// Conexión a la base de datos
 await connectDB();
 
 const app = express();
@@ -47,25 +48,29 @@ app.set('views', path.join(__dirname, 'src/views'));
 // Ruta de archivos estáticos
 app.use(express.static(path.join(__dirname, 'public')));
 
+// Middleware para inicializar el carrito en la sesión
+app.use(async (req, res, next) => {
+    if (!req.session.cartId) {
+        const cart = await new CartManager().createCart(); 
+        req.session.cartId = cart._id;  
+        console.log(`Nuevo carrito creado para la sesión con ID: ${req.session.cartId}`);
+    }
+    next();
+});
+
+// Rutas de la API
+app.use('/api/carts', cartRouter);
+
 // Configuración de WebSocket
 const httpServer = app.listen(PORT, () => {
     console.log(`Servidor escuchando en el puerto ${PORT}`);
 });
 const io = new SocketIOServer(httpServer);
 
-// Rutas
-app.use('/api/products', productsRouter(io));
-app.use('/api/carts', cartRouter);
+// Rutas que requieren `io`
+app.use('/api/products', productsRouter(io)); // Mueve esta línea después de la inicialización de `io`
 
-// Middleware para inicializar el carrito en la sesión
-app.use(async (req, res, next) => {
-    if (!req.session.cartId) {
-        const cart = await new CartManager().createCart(); 
-        req.session.cartId = cart._id;  
-    }
-    next();
-});
-
+// Rutas de la aplicación web
 app.get('/', async (req, res) => {
     try {
         const { products } = await new ProductManager().getAllProducts({ limit: 5 });
@@ -75,16 +80,18 @@ app.get('/', async (req, res) => {
     }
 });
 
+// Ruta para ver los detalles del carrito
 app.get('/cartDetails', async (req, res) => {
     try {
         const cartId = req.session.cartId;  
-        const cart = await new CartManager().getCartById(cartId); // Asegúrate de que esto use populate
+        const cart = await new CartManager().getCartById(cartId); 
         res.render('cartDetails', { cart });
     } catch (error) {
         res.status(500).send('Error en el servidor');
     }
 });
 
+// Ruta para ver un producto específico por ID
 app.get('/products/:id', async (req, res) => {
     const productId = req.params.id;
     try {
@@ -95,6 +102,7 @@ app.get('/products/:id', async (req, res) => {
     }
 });
 
+// Ruta para ver los productos en tiempo real
 app.get('/realtimeproducts', async (req, res) => {
     try {
         const { products } = await new ProductManager().getAllProducts({ limit: 10 });
@@ -104,8 +112,16 @@ app.get('/realtimeproducts', async (req, res) => {
     }
 });
 
+// Configurar eventos de WebSocket
 io.on('connection', (socket) => {
     console.log('Nuevo cliente conectado');
+
+    // Evento para actualizar productos en tiempo real
+    socket.on('newProduct', async () => {
+        const { products } = await new ProductManager().getAllProducts({ limit: 10 });
+        io.emit('updateProducts', products);
+    });
+
     socket.on('disconnect', () => {
         console.log('Cliente desconectado');
     });

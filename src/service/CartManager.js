@@ -1,5 +1,5 @@
-import mongoose from 'mongoose'; // Importa mongoose para usar ObjectId
-import Cart from '../models/Cart.js'; // Importa el modelo de MongoDB para carritos
+import mongoose from 'mongoose';
+import Cart from '../models/Cart.js';
 
 export default class CartManager {
     // Crear un nuevo carrito vacío
@@ -35,6 +35,8 @@ export default class CartManager {
             const cart = await this.getCartById(cartId);
             if (!cart) return null;
 
+            console.log("Carrito antes de agregar el producto:", cart);
+
             const productIndex = cart.products.findIndex(p => p.product.toString() === productId);
             if (productIndex !== -1) {
                 // Si el producto ya está en el carrito, incrementa la cantidad
@@ -43,7 +45,9 @@ export default class CartManager {
                 // Si el producto no está en el carrito, lo agrega
                 cart.products.push({ product: productId, quantity });
             }
-            return await cart.save(); // Guarda el carrito actualizado en la base de datos
+            const updatedCart = await cart.save(); // Guarda el carrito actualizado en la base de datos
+            console.log("Carrito después de agregar el producto:", updatedCart);
+            return updatedCart;
         } catch (error) {
             throw new Error(`Error al agregar producto al carrito: ${error.message}`);
         }
@@ -97,4 +101,3 @@ export default class CartManager {
         }
     }
 }
-
