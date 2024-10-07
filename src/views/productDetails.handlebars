@@ -1,53 +1,63 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Detalles del Producto</title>
-    <link rel="stylesheet" href="/styles.css">
+    <title>{{product.name}}</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
 </head>
 <body>
-    <header>
-        <nav class="navbar">
-            <ul>
-                <li><a href="/">Inicio</a></li>
-                <li><a href="/realtimeproducts">Productos</a></li>
-                <li><a href="#">Nosotros</a></li>
-                <li><a href="#">Contacto</a></li>
-                <li><a href="/cartDetails">Carrito</a></li>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <a class="navbar-brand" href="/">Mi Tienda</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav mr-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="/products">Productos</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/about">Nosotros</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/contact">Contacto</a>
+                </li>
             </ul>
-        </nav>
-    </header>
-    
-    <main>
-        <section id="product-details">
-            <h1>{{product.title}}</h1>
-            <div class="product-details-container">
-                <img src="{{product.thumbnails.[0]}}" alt="{{product.title}}">
-                <div class="product-info">
-                    <p><strong>Descripción:</strong> {{product.description}}</p>
-                    <p><strong>Precio:</strong> ${{product.price}}</p>
-                    <p><strong>Código:</strong> {{product.code}}</p>
-                    <p><strong>Stock disponible:</strong> {{product.stock}}</p>
-                    <p><strong>Categoría:</strong> {{product.category}}</p>
+            <ul class="navbar-nav ml-auto">
+                <li class="nav-item">
+                    <a class="nav-link btn btn-primary text-white" href="/carts">Ver Carrito</a> <!-- Botón "Ver Carrito" -->
+                </li>
+            </ul>
+        </div>
+    </nav>
 
-                    <!-- Botón para agregar al carrito desde la vista de detalles -->
-                    <button class="btn-primary" onclick="addToCart('{{product._id}}', '{{product.title}}')">Agregar al Carrito</button>
-                </div>
-            </div>
-        </section>
-    </main>
+    <div class="container mt-4">
+        <h1>{{product.name}}</h1>
+        <p>Precio: ${{product.price}}</p>
+        <p>Categoría: {{product.category}}</p>
+        <p>Descripción: {{product.description}}</p>
+        
+        <button class="btn btn-success add-to-cart" data-id="{{product._id}}">Agregar al Carrito</button>
+        <a href="/products" class="btn btn-secondary">Volver a la lista</a>
+    </div>
 
-    <footer>
-        <p>© 2024 Estuardo. Todos los derechos reservados.</p>
-    </footer>
-
-    <!-- Scripts para agregar al carrito -->
     <script>
-        function addToCart(productId, productName) {
-            alert(`Agregado ${productName} al carrito`);
-            // Aquí puedes hacer la lógica para enviar el producto al carrito
-        }
+        document.querySelector('.add-to-cart').addEventListener('click', () => {
+            const productId = document.querySelector('.add-to-cart').getAttribute('data-id');
+            fetch(`/api/carts/add-product`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ productId, quantity: 1 })
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert(data.message);
+            })
+            .catch(error => console.error('Error:', error));
+        });
     </script>
 </body>
 </html>

@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Carrito</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <a class="navbar-brand" href="/">Mi Tienda</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav mr-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="/products">Productos</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/about">Nosotros</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/contact">Contacto</a>
+                </li>
+            </ul>
+            <ul class="navbar-nav ml-auto">
+                <li class="nav-item">
+                    <a class="nav-link btn btn-primary text-white" href="/carts">Ver Carrito</a> <!-- Botón "Ver Carrito" -->
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <h1>Tu Carrito</h1>
+
+        {{#if cart.products.length}}
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>Producto</th>
+                    <th>Precio</th>
+                    <th>Cantidad</th>
+                    <th>Total</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {{#each cart.products}}
+                <tr>
+                    <td>{{this.product.name}}</td>
+                    <td>${{this.product.price}}</td>
+                    <td>{{this.quantity}}</td>
+                    <td>${{multiply this.product.price this.quantity}}</td>
+                    <td>
+                        <button class="btn btn-danger remove-from-cart" data-id="{{this.product._id}}">Eliminar</button>
+                    </td>
+                </tr>
+                {{/each}}
+            </tbody>
+        </table>
+        <p><strong>Total del carrito:</strong> ${{cart.totalPrice}}</p>
+        {{else}}
+        <p>No hay productos en tu carrito.</p>
+        {{/if}}
+
+        <a href="/products" class="btn btn-secondary">Seguir comprando</a>
+    </div>
+
+    <script>
+        document.querySelectorAll('.remove-from-cart').forEach(button => {
+            button.addEventListener('click', function() {
+                const productId = this.getAttribute('data-id');
+                fetch(`/api/carts/remove-product`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ productId })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('Producto eliminado del carrito');
+                        location.reload(); // Refrescar la página después de eliminar el producto
+                    } else {
+                        alert('Hubo un error al eliminar el producto');
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+            });
+        });
+    </script>
+</body>
+</html>

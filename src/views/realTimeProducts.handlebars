@@ -1,103 +1,51 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Productos en Tiempo Real - Estuardo</title>
-    <link rel="stylesheet" href="/styles.css">
+    <title>{{title}}</title>
 </head>
 <body>
-    <!-- Barra de navegación -->
-    <header>
-        <nav class="navbar">
-            <ul>
-                <li><a href="/">Inicio</a></li>
-                <li><a href="#">Nosotros</a></li>
-                <li><a href="#">Contacto</a></li>
-                <li><a href="/cartDetails">Carrito</a></li> <!-- Enlace actualizado -->
-            </ul>
-        </nav>
-    </header>
-    
-    <main>
-        <h2>Productos Disponibles</h2>
-        <div id="product-list" class="product-grid">
-            {{#each products}}
-                <div class="product-card">
-                    <img src="{{this.thumbnails.[0]}}" alt="{{this.title}}">
-                    <h3>{{this.title}}</h3>
-                    <p>Precio: ${{this.price}}</p>
+    <h1>{{title}}</h1>
+    <ul id="product-list">
+        {{#each products}}
+            <li>{{this.title}} - {{this.price}}</li>
+        {{/each}}
+    </ul>
 
-                    <!-- Enlace corregido para ver detalles -->
-                    <div class="details-button">
-                        <a href="/products/{{this._id}}" class="btn-secondary">Ver Detalles</a>
-                    </div>
-                    
-                    <!-- Botón Agregar al Carrito -->
-                    <div class="add-to-cart-container">
-                        <button class="btn-secondary" onclick="addToCart('{{this._id}}', '{{this.title}}')">Agregar al Carrito</button>
-                    </div>
-                </div>
-            {{else}}
-                <p>No hay productos disponibles en este momento.</p>
-            {{/each}}
-        </div>
-    </main>
-    
-    <footer>
-        <p>© 2024 Estuardo. Todos los derechos reservados.</p>
-    </footer>
+    <h2>Agregar Producto</h2>
+    <form id="addProductForm">
+        <input type="text" id="productTitle" placeholder="Título" required>
+        <input type="number" id="productPrice" placeholder="Precio" required>
+        <button type="submit">Agregar Producto</button>
+    </form>
 
     <script src="/socket.io/socket.io.js"></script>
     <script>
         const socket = io();
-        const productList = document.getElementById('product-list');
 
-        // Función para renderizar todos los productos
-        const renderProducts = (products) => {
-            productList.innerHTML = ''; // Limpiar la lista actual
-
+        // Actualizar la lista de productos cuando se recibe una actualización
+        socket.on('updateProducts', (products) => {
+            const productList = document.getElementById('product-list');
+            productList.innerHTML = '';
             products.forEach(product => {
-                const productElement = document.createElement('div');
-                productElement.classList.add('product-card');
-                productElement.innerHTML = `
-                    <img src="${product.thumbnails[0]}" alt="${product.title}">
-                    <h3>${product.title}</h3>
-                    <p>Precio: $${product.price}</p>
-                    <div class="details-button">
-                        <!-- Enlace corregido para la vista de detalles del producto -->
-                        <a href="/products/${product._id}" class="btn-secondary">Ver Detalles</a>
-                    </div>
-                    <div class="add-to-cart-container">
-                        <button class="btn-secondary" onclick="addToCart('${product._id}', '${product.title}')">Agregar al Carrito</button>
-                    </div>
-                `;
-                productList.appendChild(productElement);
+                const li = document.createElement('li');
+                li.textContent = `${product.title} - ${product.price}`;
+                productList.appendChild(li);
             });
-        };
-
-        function addToCart(productId, productName) {
-            alert(`Agregado ${productName} al carrito`);
-            // Aquí puedes hacer la lógica para enviar el producto al carrito
-        }
-
-        socket.on('initialProducts', (products) => {
-            renderProducts(products);
         });
 
-        socket.on('newProduct', (product) => {
-            renderProducts([product]);
-        });
+        // Formulario para agregar un nuevo producto
+        const form = document.getElementById('addProductForm');
+        form.addEventListener('submit', (event) => {
+            event.preventDefault();
 
-        socket.on('updateProduct', (updatedProduct) => {
-            renderProducts([updatedProduct]);
-        });
+            const newProduct = {
+                title: document.getElementById('productTitle').value,
+                price: document.getElementById('productPrice').value
+            };
 
-        socket.on('deleteProduct', (deletedProduct) => {
-            const productElement = document.querySelector(`.product-card[data-id="${deletedProduct._id}"]`);
-            if (productElement) {
-                productElement.remove();
-            }
+            socket.emit('addProduct', newProduct);
         });
     </script>
 </body>

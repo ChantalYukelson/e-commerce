@@ -1,125 +1,128 @@
-import ProductManager from '../service/ProductManager.js';
-
-const productManager = new ProductManager();
+const Product = require('../models/Product');
+const mongoose = require('mongoose');
 
 // Obtener todos los productos con paginación, filtrado y ordenamiento
-export const getProducts = async (req, res) => {
+const getProducts = async (req, res) => {
     try {
-        const { limit = 10, page = 1, sort, query } = req.query;
-
-        // Filtros de búsqueda
-        const filter = query
-            ? { $or: [{ category: query }, { title: { $regex: query, $options: 'i' } }] }
-            : {};
-
-        // Ordenamiento por precio (ascendente o descendente)
-        let sortOption = {};
-        if (sort === 'asc') sortOption = { price: 1 };
-        if (sort === 'desc') sortOption = { price: -1 };
-
-        // Llamada a la base de datos con paginación, límite, filtro y ordenamiento
-        const { products, totalPages, currentPage, totalProducts } = await productManager.getAllProducts({
-            filter,
-            limit: parseInt(limit),
+        const { limit = 10, page = 1, sort = '', query = '' } = req.query;
+        const options = {
             page: parseInt(page),
-            sort: sortOption
-        });
+            limit: parseInt(limit),
+            sort: sort === 'asc' ? { price: 1 } : sort === 'desc' ? { price: -1 } : {},
+        };
 
-        // Configurar enlaces de paginación
-        const prevPage = currentPage > 1 ? currentPage - 1 : null;
-        const nextPage = currentPage < totalPages ? currentPage + 1 : null;
-        const prevLink = prevPage
-            ? `/api/products?limit=${limit}&page=${prevPage}&sort=${sort}&query=${query}`
-            : null;
-        const nextLink = nextPage
-            ? `/api/products?limit=${limit}&page=${nextPage}&sort=${sort}&query=${query}`
-            : null;
+        const filter = query ? { $text: { $search: query } } : {};
+        const result = await Product.paginate(filter, options);
 
-        // Devolver la respuesta en formato JSON
-        res.json({
-            status: 'success',
-            payload: products,
-            totalPages,
-            prevPage,
-            nextPage,
-            page: currentPage,
-            hasPrevPage: prevPage !== null,
-            hasNextPage: nextPage !== null,
-            prevLink,
-            nextLink,
-            totalProducts
+        // Mapear los productos para incluir los campos adicionales
+        const productsWithDetails = result.docs.map(product => ({
+            _id: product._id,
+            name: product.name,
+            description: product.description,
+            price: product.price,
+            stock: product.stock,
+            category: product.category,
+        }));
+
+        res.render('products', {
+            products: productsWithDetails, // Usar el nuevo array mapeado
+            title: 'Lista de Productos',
+            totalPages: result.totalPages,
+            prevPage: result.prevPage,
+            nextPage: result.nextPage,
+            page: result.page,
+            hasPrevPage: result.hasPrevPage,
+            hasNextPage: result.hasNextPage,
+            prevLink: result.hasPrevPage ? `/products?limit=${limit}&page=${result.prevPage}&sort=${sort}&query=${query}` : null,
+            nextLink: result.hasNextPage ? `/products?limit=${limit}&page=${result.nextPage}&sort=${sort}&query=${query}` : null,
         });
     } catch (error) {
-        console.error('Error al obtener productos:', error.message);
-        res.status(500).json({ error: 'Error al obtener los productos' });
+        console.error('Error en getProducts:', error);
+        res.status(500).send('Error al obtener los productos');
     }
 };
-
-// Obtener un producto por ID
-export const getProductById = async (req, res) => {
+// Obtener un producto específico por ID
+const getProductById = async (req, res) => {
     try {
-        const { id } = req.params;
-        const product = await productManager.getProductById(id);
+        const productId = mongoose.Types.ObjectId(req.params.pid); // Cast a ObjectId
+        const product = await Product.findById(productId);
 
         if (!product) {
-            return res.status(404).json({ error: 'Producto no encontrado' });
+            return res.status(404).json({ message: 'Producto no encontrado' });
         }
 
-        res.json({ status: 'success', payload: product });
+        res.render('productDetail',   
+ { product });
     } catch (error) {
-        console.error('Error al obtener producto por ID:', error.message);
-        res.status(500).json({ error: 'Error al obtener el producto' });
+        res.status(500).json({ message: 'Error al obtener el producto', error });
     }
 };
 
 // Agregar un nuevo producto
-export const addProduct = async (req, res) => {
+const addProduct = async (req, res) => {
     try {
-        const productData = req.body;
-        const newProduct = await productManager.addProduct(productData);
-
-        if (!newProduct) {
-            return res.status(400).json({ error: 'No se pudo agregar el producto' });
-        }
-
-        res.json({ status: 'success', payload: newProduct });
+        const newProduct = new Product(req.body);
+        const savedProduct = await newProduct.save();
+        res.status(201).json({ status: 'success', payload: savedProduct });
     } catch (error) {
-        console.error('Error al agregar el producto:', error.message);
-        res.status(500).json({ error: 'Error al agregar el producto' });
+        console.error('Error en addProduct:', error);
+        res.status(500).json({ message: 'Error al agregar el producto', error });
     }
 };
 
-// Actualizar un producto por ID
-export const updateProduct = async (req, res) => {
+// Actualizar un producto por su ID
+const updateProduct = async (req, res) => {
     try {
-        const { id } = req.params;
-        const updatedFields = req.body;
-        const updatedProduct = await productManager.updateProduct(id, updatedFields);
+        const productId = req.params.pid;
+        const updateData = { ...req.body };
 
-        if (!updatedProduct) {
-            return res.status(404).json({ error: 'Producto no encontrado o no actualizado' });
+        // Eliminar el campo _id si está presente
+        delete updateData._id;
+
+        const updatedProduct = await Product.findByIdAndUpdate(productId, updateData, { new: true });
+        if (updatedProduct) {
+            res.status(200).json({ status: 'success', payload: updatedProduct });
+        } else {
+            res.status(404).json({ message: 'Producto no encontrado' });
         }
-
-        res.json({ status: 'success', payload: updatedProduct });
     } catch (error) {
-        console.error('Error al actualizar el producto:', error.message);
-        res.status(500).json({ error: 'Error al actualizar el producto' });
+        console.error('Error en updateProduct:', error);
+        res.status(500).json({ message: 'Error al actualizar el producto', error });
     }
 };
 
-// Eliminar un producto por ID
-export const deleteProduct = async (req, res) => {
+
+// Eliminar un producto por su ID
+const deleteProduct = async (req, res) => {
     try {
-        const { id } = req.params;
-        const deletedProduct = await productManager.deleteProduct(id);
-
-        if (!deletedProduct) {
-            return res.status(404).json({ error: 'Producto no encontrado o no eliminado' });
+        const productId = req.params.pid;
+        const deletedProduct = await Product.findByIdAndDelete(productId);
+        if (deletedProduct) {
+            res.status(200).json({ status: 'success', message: 'Producto eliminado correctamente' });
+        } else {
+            res.status(404).json({ message: 'Producto no encontrado' });
         }
-
-        res.json({ status: 'success', payload: deletedProduct });
     } catch (error) {
-        console.error('Error al eliminar el producto:', error.message);
-        res.status(500).json({ error: 'Error al eliminar el producto' });
+        console.error('Error en deleteProduct:', error);
+        res.status(500).json({ message: 'Error al eliminar el producto', error });
     }
+};
+
+const deleteAllProducts = async (req, res) => {
+    try {
+        await Product.deleteMany({});
+        res.status(200).json({ status: 'success', message: 'Todos los productos han sido eliminados.' });
+    } catch (error) {
+        console.error('Error al eliminar productos:', error);
+        res.status(500).json({ status: 'error', message: 'Error al eliminar productos', error });
+    }
+};
+
+module.exports = {
+    getProducts,
+    getProductById,
+    addProduct,
+    updateProduct,
+    deleteProduct,
+    deleteAllProducts,
 };

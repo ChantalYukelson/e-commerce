@@ -1,100 +1,87 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Estuardo - Moda para Hombres</title>
-    <link rel="stylesheet" href="/styles.css">
+    <title>{{Estuardo}}</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/public/styles.css">
 </head>
 <body>
-    <!-- Barra de navegación -->
-    <header>
-        <nav class="navbar">
-            <ul>
-                <li><a href="/">Inicio</a></li>
-                <li><a href="#">Nosotros</a></li>
-                <li><a href="#">Contacto</a></li>
-                <!-- Enlace al carrito -->
-                <li><a href="/cartDetails">Carrito</a></li>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <a class="navbar-brand" href="/">Estuardo</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav mr-auto">
+                <li class="nav-item active">
+                    <a class="nav-link" href="/products">Productos</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/about">Nosotros</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/contact">Contacto</a>
+                </li>
+            </ul>
+            <ul class="navbar-nav ml-auto">
+                <li class="nav-item">
+                    <a class="nav-link btn btn-primary text-white" href="/carts">Carrito</a> <!-- Botón "Ver Carrito" -->
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <h1>{{title}}</h1>
+        <div class="row">
+            {{#each products}}
+            <div class="col-md-4 mb-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">{{this.name}}</h5>
+                        <p class="card-text">Precio: ${{this.price}}</p>
+                        <p class="card-text">Categoría: {{this.category}}</p>
+                        <a href="/products/{{this._id}}" class="btn btn-primary">Ver Detalles</a>
+                        <button class="btn btn-success add-to-cart" data-id="{{this._id}}">Agregar al Carrito</button>
+                    </div>
+                </div>
+            </div>
+            {{/each}}
+        </div>
+
+        <!-- Paginación -->
+        <nav aria-label="Page navigation">
+            <ul class="pagination justify-content-center">
+                <li class="page-item {{#if isFirstPage}}disabled{{/if}}">
+                    <a class="page-link" href="/products?page={{prevPage}}" tabindex="-1">Anterior</a>
+                </li>
+                {{#each pages}}
+                <li class="page-item {{#if this.isCurrent}}active{{/if}}">
+                    <a class="page-link" href="/products?page={{this.number}}">{{this.number}}</a>
+                </li>
+                {{/each}}
+                <li class="page-item {{#if isLastPage}}disabled{{/if}}">
+                    <a class="page-link" href="/products?page={{nextPage}}">Siguiente</a>
+                </li>
             </ul>
         </nav>
-    </header>
-    
-    <!-- Sección principal -->
-    <main>
-        <section id="hero">
-            <h2>Moda masculina de calidad</h2>
-            <p>Descubre nuestras colecciones de ropa moderna y elegante.</p>
-            <a href="/realtimeproducts" class="btn-primary">Ver Productos</a>
-        </section>
 
-        <!-- Catálogo de productos -->
-        <section id="destacados">
-            <h2>Productos Destacados</h2>
-            <div class="product-grid">
-                {{#each products}}
-                    <div class="product-card">
-                        <img src="{{this.thumbnails.[0]}}" alt="{{this.title}}">
-                        <h3>{{this.title}}</h3>
-                        <p>Precio: ${{this.price}}</p>
+        <!-- Botón para volver a la página 1 cuando estás en la página 2 -->
+        {{#if isPageTwo}}  <!-- Este condicional asegura que el botón solo aparezca en la página 2 -->
+        <div class="text-center mt-4">
+            <a href="/products?page=1" class="btn btn-secondary">Volver a la página 1</a>
+        </div>
+        {{/if}}
+    </div>
 
-                        <!-- Botón Ver Detalles -->
-                        <a href="/products/{{this._id}}" class="btn-secondary">Ver Detalles</a>
-
-                        <!-- Se eliminaron los controles de carrito aquí -->
-                    </div>
-                {{else}}
-                    <p>No hay productos disponibles en este momento.</p>
-                {{/each}}
-            </div>
-        </section>
-    </main>
-
-    <!-- Pie de página -->
-    <footer>
-        <p>© 2024 Estuardo. Todos los derechos reservados.</p>
+    <footer class="bg-light text-center mt-4 py-3">
+        <p>&copy; 2024 Mi Tienda. Todos los derechos reservados.</p>
     </footer>
 
-    <!-- Scripts de carrito -->
-    <script>
-        // Funciones para manejar la cantidad de productos
-        function incrementQuantity(productId) {
-            const quantityElement = document.getElementById(`quantity-${productId}`);
-            quantityElement.textContent = parseInt(quantityElement.textContent) + 1;
-        }
-
-        function decrementQuantity(productId) {
-            const quantityElement = document.getElementById(`quantity-${productId}`);
-            const currentQuantity = parseInt(quantityElement.textContent);
-            if (currentQuantity > 0) {
-                quantityElement.textContent = currentQuantity - 1;
-            }
-        }
-
-        async function addToCart(productId, productName) {
-            const quantityElement = document.getElementById(`quantity-${productId}`);
-            const quantity = parseInt(quantityElement.textContent);
-            if (quantity > 0) {
-                try {
-                    // Hacer la petición POST para agregar productos al carrito
-                    const response = await fetch('/api/carts/add-product', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ productId, quantity })
-                    });
-
-                    if (response.ok) {
-                        alert(`${productName} agregado al carrito`); // Cambiar el mensaje para mostrar el nombre del producto
-                    } else {
-                        alert('Error al agregar producto al carrito');
-                    }
-                } catch (error) {
-                    console.error('Error al agregar producto:', error);
-                }
-            } else {
-                alert('Debes seleccionar al menos un producto.');
-            }
-        }
-    </script>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.0.7/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 </body>
 </html>

@@ -1,180 +1,66 @@
-/* Estilos globales */
+/* styles.css */
+
+/* General body styles */
 body {
-    font-family: Arial, sans-serif;
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    background-color: #f4f4f4;
+    background-color: #f8f8f8; /* fondo gris claro */
+    color: #333; /* texto negro */
+    font-family: 'Arial', sans-serif; /* Cambia la fuente según tu preferencia */
 }
 
-h1, h2, h3 {
-    text-align: center;
-    margin-bottom: 1em;
+/* Encabezados */
+h1, h2, h3, h4, h5, h6 {
+    color: #111; /* texto negro */
 }
 
-/* Barra de navegación */
-.navbar {
-    background-color: #333;
-    padding: 1em;
-    display: flex;
-    justify-content: center;
-}
-
-.navbar ul {
-    list-style-type: none;
-    margin: 0;
-    padding: 0;
-    display: flex;
-    gap: 2em;
-}
-
-.navbar ul li {
-    display: inline;
-}
-
-.navbar ul li a {
-    color: white;
-    text-decoration: none;
-    font-size: 1.2em;
-}
-
-.navbar ul li a:hover {
-    text-decoration: underline;
-}
-
-/* Hero Section */
-#hero {
-    background-color: #444;
-    color: white;
-    padding: 2em;
-    text-align: center;
-}
-
-#hero h2 {
-    margin-bottom: 1em;
-}
-
-#hero p {
-    margin-bottom: 1.5em;
-}
-
-#hero a {
-    background-color: #007bff;
-    color: white;
-    padding: 0.75em 1.5em;
-    border-radius: 5px;
-    text-decoration: none;
-    font-weight: bold;
-}
-
-#hero a:hover {
-    background-color: #0056b3;
-}
-
-/* Estilos del catálogo de productos */
-.product-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-    gap: 20px;
-    padding: 2em;
-}
-
-.product-card {
-    background-color: white;
-    padding: 1.5em;
-    border-radius: 5px;
-    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
-    text-align: center;
-}
-
-.product-card img {
-    width: 100%;
-    height: auto;
-    border-radius: 5px;
-    margin-bottom: 1em;
-}
-
-.product-card h3 {
-    font-size: 1.5em;
-    margin-bottom: 0.5em;
-}
-
-.product-card p {
-    font-size: 1em;
-    margin-bottom: 1em;
-}
-
-/* Botones */
-.btn-primary {
-    background-color: #007bff;
-    color: white;
-    padding: 0.5em 1em;
-    border: none;
-    border-radius: 5px;
-    text-decoration: none;
-    display: inline-block;
-}
-
-.btn-primary:hover {
-    background-color: #0056b3;
-}
-
-.btn-secondary {
-    background-color: #6c757d;
-    color: white;
-    padding: 0.5em 1em;
-    border: none;
+/* Estilos para botones */
+button {
+    background-color: #333; /* fondo negro */
+    color: white; /* texto blanco */
+    border: none; /* sin borde */
+    padding: 10px 15px;
     border-radius: 5px;
     cursor: pointer;
+    font-size: 16px;
 }
 
-/* Agregar un margen en los botones secundarios para separarlos */
-.btn-secondary {
-    margin: 0.5em 0; /* Margen superior e inferior */
+button:hover {
+    background-color: #555; /* fondo gris oscuro al pasar el mouse */
 }
 
-.btn-secondary:hover {
-    background-color: #5a6268;
+/* Enlaces */
+a {
+    color: #007BFF; /* color azul para enlaces */
+    text-decoration: none; /* sin subrayado */
 }
 
-/* Estilos para la descripción oculta */
-.description {
-    margin-top: 10px;
-    background-color: #f9f9f9;
+a:hover {
+    text-decoration: underline; /* subrayar al pasar el mouse */
+}
+
+/* Estilos para formularios */
+input[type="text"],
+input[type="number"],
+textarea {
+    border: 1px solid #ccc; /* borde gris claro */
+    border-radius: 4px;
     padding: 10px;
-    border: 1px solid #ddd;
-    display: none; /* Oculta la descripción por defecto */
-    transition: all 0.3s ease;
+    width: 100%; /* ocupa todo el ancho */
+    margin-bottom: 15px; /* espacio entre campos */
 }
 
-/* Controles de carrito */
-.cart-controls {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    margin: 10px 0; /* Margen vertical */
+input[type="text"]:focus,
+input[type="number"]:focus,
+textarea:focus {
+    border-color: #333; /* borde negro al enfocar */
+    outline: none; /* sin contorno */
 }
 
-.cart-controls button {
-    padding: 0.5em;
-    margin: 0 5px; /* Espacio entre botones */
-}
-
-.quantity {
-    margin: 0 10px; /* Espacio alrededor del contador */
-}
-
-/* Agregar al carrito - centrado */
-.add-to-cart-container {
-    margin-top: 10px;
-    text-align: center;
-}
-
-/* Pie de página */
-footer {
-    background-color: #333;
-    color: white;
-    text-align: center;
-    padding: 10px; /* Ajusta este valor según sea necesario */
-    margin-top: 20px; /* Espacio entre el main y el footer */
+/* Estilos para tarjetas o contenedores */
+.card {
+    background-color: white; /* fondo blanco */
+    border: 1px solid #ddd; /* borde gris */
+    border-radius: 5px;
+    padding: 15px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* sombra suave */
+    margin-bottom: 20px; /* espacio entre tarjetas */
 }
