@@ -7,7 +7,8 @@ const productSchema = new mongoose.Schema({
     price: { type: Number, required: true },
     stock: { type: Number, required: true },
     category: { type: String },
-    available: { type: Boolean, default: true }
+    available: { type: Boolean, default: true },
+    thumbnails: { type: [String], default: [] }
 });
 
 productSchema.index({ name: 'text', description: 'text' }); // Índice de texto

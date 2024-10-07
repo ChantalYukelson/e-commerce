@@ -8,7 +8,7 @@
 </head>
 <body>
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
-        <a class="navbar-brand" href="/">Mi Tienda</a>
+        <a class="navbar-brand" href="/">Estuardo</a>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
@@ -39,6 +39,7 @@
             <div class="col-md-4 mb-4">
                 <div class="card">
                     <div class="card-body">
+                        <img src="{{this.thumbnails.[0]}}" alt="{{this.title}}">
                         <h5 class="card-title">{{this.name}}</h5>
                         <p class="card-text">Precio: ${{this.price}}</p>
                         <p class="card-text">Categoría: {{this.category}}</p>
@@ -86,7 +87,7 @@
     </div>
 
     <footer class="bg-light text-center mt-4 py-3">
-        <p>&copy; 2024 Mi Tienda. Todos los derechos reservados.</p>
+        <p>&copy; 2024 Estuardo. Todos los derechos reservados.</p>
     </footer>
 
     <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
